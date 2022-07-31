@@ -1,0 +1,13 @@
+#!/bin/bash
+
+is_pipe() {
+  if [ -p /dev/stdin ]; then
+    return 0
+  elif [ -p /dev/stdout ]; then
+    return 0
+  else
+    return 1
+  fi
+}
+
+is_pipe

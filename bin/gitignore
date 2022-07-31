@@ -1,0 +1,16 @@
+#!/bin/sh
+
+gitignore() {
+  api="gitignore.io/api/"
+  case "$#" in
+    0)
+      curl -sL "$api/$(curl -sL "$api"/list | tr "," "\n" | fzf)" >>.gitignore
+      ;;
+    1)
+      curl -sL "$api/$1" >>.gitignore
+      ;;
+    *) ;;
+  esac
+}
+
+gitignore "$@"

@@ -1,0 +1,11 @@
+#!/bin/bash
+
+if is_pipe; then
+  awk '{ v[$0]++ } END { for ( k in v ) print v[k] "\t" k }'
+else
+  if [[ -e "$1" ]]; then
+    awk '{ v[$0]++ } END { for ( k in v ) print v[k] "\t" k }' "$@"
+  else
+    printf "%s file not found" "$1" 1>&2
+  fi
+fi

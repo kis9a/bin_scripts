@@ -1,0 +1,18 @@
+#!/bin/bash
+
+function primes() {
+  local i
+  local n="$1"
+
+  if [[ n -gt 1 ]]; then
+    printf "%s " "2"
+  fi
+
+  for ((i = 1; i < n + 1; i = i + 2)); do
+    if is_prime "$i"; then
+      printf "%s " "$i"
+    fi
+  done
+}
+
+primes "$1"

@@ -1,0 +1,19 @@
+#!/bin/bash
+
+readonly cf="\\033[0m"
+readonly red="\\033[0;31m"
+readonly green="\\033[0;32m"
+
+check_required_commands() {
+  readonly required_commands=("$@")
+  local command
+  for command in "${required_commands[@]}"; do
+    if is_exists "${command}"; then
+      echo -e "${green}✓ ${cf} ${command}" 1>&2
+    else
+      echo -e "${red}❌${cf} ${command}" 1>&2
+    fi
+  done
+}
+
+check_required_commands "$@"

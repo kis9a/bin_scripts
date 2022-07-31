@@ -1,0 +1,23 @@
+#!/bin/bash
+
+is_prime() {
+  declare -i n="$1"
+  if [[ "$n" -le 1 ]]; then
+    return 1
+  elif [[ $n -le 3 ]]; then
+    return 0
+  elif [[ $((n % 2)) == 0 ]] || [[ $((n % 3)) == 0 ]]; then
+    return 1
+  fi
+
+  local i=5
+  while [[ $((i * i)) -le $n ]]; do
+    if [[ $((n % i)) == 0 ]] || [[ $((n % (i + 2))) == 0 ]]; then
+      return 1
+    fi
+    ((i += 6))
+  done
+  return 0
+}
+
+is_prime "$@"

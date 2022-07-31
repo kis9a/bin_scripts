@@ -1,0 +1,53 @@
+#!/bin/bash
+
+G="#"
+
+pane_border() {
+  local columns
+  local rows
+  local full=1
+  local str
+  local i
+
+  columns="$(tput cols)"
+  rows="$(($(tput lines) - 1))"
+
+  if [[ -z $(LC_ALL=C grep -o '[[:print:][:cntrl:]]' <<<"$1") ]]; then
+    full=0
+    columns="$((columns / 2))"
+  fi
+
+  str=""
+  if [[ $full -eq 0 ]]; then
+    for ((j = 0; j < $((columns - 2)); j = j + 1)); do
+      str="  "$str
+    done
+  else
+    for ((j = 0; j < $((columns - 2)); j = j + 1)); do
+      str=" "$str
+    done
+  fi
+
+  for ((i = 1; i < rows; i++)); do
+    if [[ $i -eq 1 ]] || [[ $i -eq $((rows - 1)) ]]; then
+      for ((j = 0; j < columns; j = j + 1)); do
+        printf "%s" "$1"
+      done
+      printf "\n"
+    else
+      printf "%s" "$1"
+      printf "%s" "$str"
+      printf "%s\n" "$1"
+    fi
+  done
+}
+
+if [[ -n "$1" ]]; then
+  if [[ "${#1}" -gt 1 ]]; then
+    printf "length expected less than 1\n" 1>&2
+  else
+    G="$1"
+  fi
+fi
+
+pane_border "$G"

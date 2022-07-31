@@ -1,0 +1,7 @@
+#!/bin/bash
+
+is_bash() {
+  [[ -n "$BASH_VERSION" ]]
+}
+
+is_bash "$@"

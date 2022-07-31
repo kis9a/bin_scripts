@@ -1,0 +1,13 @@
+#!/bin/bash
+
+is_sh_file() {
+  local extension
+  extension="${1##*.}"
+  if [[ -x "$1" ]] || [[ "$extension" == "sh" ]] || [[ "$extension" == "bash" ]]; then
+    return 0
+  else
+    return 1
+  fi
+}
+
+is_sh_file "$@"

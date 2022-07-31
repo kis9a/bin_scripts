@@ -1,0 +1,21 @@
+#!/bin/bash
+
+module_names() {
+  local c=0
+  while read -r f; do
+    grep ^module <"$f" | cut -f 2 -d " " | tr -d \"
+  done < <(find ./*.tf)
+}
+
+modules() {
+  while read -r m; do
+    cat <<EOF
+output "$m" {
+  value = module.$m
+}
+
+EOF
+  done <<<"$(module_names)"
+}
+
+modules

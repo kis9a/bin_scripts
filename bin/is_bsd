@@ -1,0 +1,11 @@
+#!/bin/bash
+
+is_bsd() {
+  if [[ "$(str_lower "$(uname)")" == .*bsd.* ]]; then
+    return 0
+  else
+    return 1
+  fi
+}
+
+is_bsd

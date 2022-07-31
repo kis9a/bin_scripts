@@ -1,0 +1,63 @@
+#!/bin/bash
+
+readonly cf="\\033[0m"
+readonly red="\\033[0;31m"
+readonly green="\\033[0;32m"
+
+TRUE=0
+FALSE=1
+
+assert_equal() {
+  if [[ "$1" != "$2" ]]; then
+    return 1
+  else
+    return 0
+  fi
+}
+
+test_err() {
+  echo -e "${red}❌${cf} $1" 1>&2
+}
+
+test_succ() {
+  echo -e "${green}✓ ${cf} $1" 1>&2
+}
+
+test_is_arr_contains() {
+  local case
+  local element
+  local expected
+  local actual
+
+  case="$1" && expected="$2" && element="$3" && shift && shift && shift
+  if is_arr_contains "$element" "$@"; then
+    actual="$TRUE"
+  else
+    actual="$FALSE"
+  fi
+
+  if assert_equal "$actual" "$expected"; then
+    test_succ "test_is_arr_contains $case"
+  else
+    test_err "test_is_arr_contains $case"
+  fi
+}
+
+run_test() {
+  arr=("a" "b" "c")
+  test_is_arr_contains "case string contains" "$TRUE" "b" "${arr[@]}"
+
+  arr=("a" "b" "c")
+  test_is_arr_contains "case string not contains" "$FALSE" "d" "${arr[@]}"
+
+  arr=(true false true)
+  test_is_arr_contains "case bool contains" "$TRUE" false "${arr[@]}"
+
+  arr=(true true true)
+  test_is_arr_contains "case bool not contains" "$FALSE" false "${arr[@]}"
+
+  arr=()
+  test_is_arr_contains "case empty not contains" "$FALSE" "" "${arr[@]}"
+}
+
+run_test "$@"

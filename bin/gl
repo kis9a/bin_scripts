@@ -1,0 +1,107 @@
+#!/bin/bash
+
+readonly cf="\\033[0m"
+readonly red="\\033[0;31m"
+
+POSITIONAL_ARGS=()
+
+log_err() {
+  echo -e "${red}❌${cf} $1" 1>&2
+}
+
+err_exit() {
+  log_err "$1"
+  if [[ -z "$2" ]]; then
+    exit 1
+  else
+    exit "$2"
+  fi
+}
+
+is_number() {
+  if [[ "$1" =~ ^[0-9]+$ ]]; then
+    return 0
+  else
+    return 1
+  fi
+}
+
+exit_health() {
+  exit 0
+}
+
+git_log() {
+  git log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit --date=relative -"$1"
+}
+
+git_log_graph_oneline() {
+  git log --graph --oneline --decorate --all
+}
+
+git_log_oneline() {
+  git log --oneline
+}
+
+git_log_status() {
+  git log --name-status --oneline
+}
+
+help() {
+  cat <<EOF
+
+USAGE:
+  gl [options] [arguments]
+
+OPTIONS:
+  -h|--help: hlep
+
+ACTIONS:
+    s: git_log_status
+    o: git_log_oneline
+    g: git_log_graph_oneline
+EOF
+}
+
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    -h | --help)
+      help
+      exit_health
+      ;;
+    -* | --*)
+      err_exit "Invalid option" 1
+      break
+      ;;
+    *)
+      POSITIONAL_ARGS+=("$1")
+      shift
+      ;;
+  esac
+done
+
+set -- "${POSITIONAL_ARGS[@]}"
+
+run() {
+  local action="$1"
+  shift
+  case "$action" in
+    "s") git_log_status "$@" ;;
+    "o") git_log_oneline "$@" ;;
+    "g") git_log_graph_oneline "$@" ;;
+    "h" | "help")
+      help
+      exit_health
+      ;;
+    *) ;;
+  esac
+}
+
+if [[ -z "$1" ]] || is_number "$1"; then
+  if [[ -z "$1" ]]; then
+    git_log 10
+  else
+    git_log "$1"
+  fi
+else
+  run "$@"
+fi

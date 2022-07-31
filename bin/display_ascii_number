@@ -1,0 +1,123 @@
+#!/bin/bash
+
+function display_ascii_number() {
+  if [ "$ZSH_NAME" = "zsh" ]; then
+    setopt localoptions ksharrays
+  fi
+
+  local i
+  n=("$(get_ascii_number_map $1)")
+  for ((i = 0; i < ${#n[*]}; i++)); do
+    if [[ $((i % 5)) -eq 0 ]]; then
+      echo -n ' '
+    fi
+
+    if [[ ${n[i]} -eq 1 ]]; then
+      echo -n "${2:=█}"
+    else
+      echo -n ' '
+    fi
+
+    if [[ $((i % 5)) -eq 4 ]]; then
+      echo ''
+    fi
+  done
+}
+
+function get_ascii_number_map() {
+  # maps
+  zero=(
+    1 1 1 1 1
+    1 0 0 0 1
+    1 0 0 0 1
+    1 0 0 0 1
+    1 1 1 1 1)
+
+  one=(
+    0 0 1 0 0
+    0 1 1 0 0
+    0 0 1 0 0
+    0 0 1 0 0
+    0 1 1 1 0)
+
+  two=(
+    1 1 1 1 1
+    0 0 0 0 1
+    1 1 1 1 1
+    1 0 0 0 0
+    1 1 1 1 1)
+
+  three=(
+    1 1 1 1 1
+    0 0 0 0 1
+    1 1 1 1 1
+    0 0 0 0 1
+    1 1 1 1 1)
+
+  four=(
+    1 0 0 0 1
+    1 0 0 0 1
+    1 1 1 1 1
+    0 0 0 0 1
+    0 0 0 0 1)
+
+  five=(
+    1 1 1 1 1
+    1 0 0 0 0
+    1 1 1 1 1
+    0 0 0 0 1
+    1 1 1 1 1)
+
+  six=(
+    1 1 1 1 1
+    1 0 0 0 0
+    1 1 1 1 1
+    1 0 0 0 1
+    1 1 1 1 1)
+
+  seven=(
+    1 1 1 1 1
+    0 0 0 0 1
+    0 0 0 0 1
+    0 0 0 0 1
+    0 0 0 0 1)
+
+  eight=(
+    1 1 1 1 1
+    1 0 0 0 1
+    1 1 1 1 1
+    1 0 0 0 1
+    1 1 1 1 1)
+
+  nine=(
+    1 1 1 1 1
+    1 0 0 0 1
+    1 1 1 1 1
+    0 0 0 0 1
+    0 0 0 0 1)
+
+  colon=(
+    0 0 0 0 0
+    0 0 1 0 0
+    0 0 0 0 0
+    0 0 1 0 0
+    0 0 0 0 0)
+
+  # case map
+  case "$1" in
+    0) echo "${zero[*]}" ;;
+    1) echo "${one[*]}" ;;
+    2) echo "${two[*]}" ;;
+    3) echo "${three[*]}" ;;
+    4) echo "${four[*]}" ;;
+    5) echo "${five[*]}" ;;
+    6) echo "${six[*]}" ;;
+    7) echo "${seven[*]}" ;;
+    8) echo "${eight[*]}" ;;
+    9) echo "${nine[*]}" ;;
+    :) echo "${colon[*]}" ;;
+    *) ;;
+  esac
+}
+
+display_ascii_number "$@"

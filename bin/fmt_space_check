@@ -1,0 +1,26 @@
+#!/bin/bash
+
+fmt_space_check() {
+  i=0
+  file="$1"
+  declare -a lines
+  IFS=""
+  while read -r l; do
+    # check str front space
+    if [[ "$l" =~ ^[[:blank:]]+ ]]; then
+      if [[ "$((${#BASH_REMATCH} % 2))" != 0 ]]; then
+        echo "front: "$((i + 1))": $l"
+      fi
+    fi
+    # check str back space
+    if [[ "$l" =~ [[:space:]]*$ ]]; then
+      if [[ "${#BASH_REMATCH}" != 0 ]]; then
+        echo "back: "$((i + 1))": $l"
+      fi
+    fi
+    lines+=("$l")
+    ((i++))
+  done <"$file"
+}
+
+fmt_space_check "$@"

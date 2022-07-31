@@ -1,0 +1,17 @@
+#!/bin/bash
+
+get_os_type() {
+  if is_osx; then
+    printf "osx"
+  fi
+
+  if is_linux; then
+    printf "linux"
+  fi
+
+  if is_bsd; then
+    printf "bsd"
+  fi
+}
+
+get_os_type

@@ -1,0 +1,11 @@
+#!/bin/bash
+
+is_alphabet() {
+  if [[ "$1" =~ ^[[:alpha:]]*$ ]]; then
+    return 0
+  else
+    return 1
+  fi
+}
+
+is_alphabet "$@"

@@ -1,0 +1,11 @@
+#!/bin/bash
+
+if is_pipe; then
+  sed 1d
+else
+  if [[ -e "$1" ]]; then
+    sed 1d <"$1"
+  else
+    echo -e "$1" | sed 1d
+  fi
+fi

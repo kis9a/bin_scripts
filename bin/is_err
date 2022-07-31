@@ -1,0 +1,9 @@
+#!/bin/bash
+
+is_err() {
+  if [[ $? -gt 0 ]]; then
+    return 0
+  else
+    return 1
+  fi
+}

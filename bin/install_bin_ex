@@ -1,0 +1,109 @@
+#!/bin/bash
+
+readonly cf="\\033[0m"
+readonly red="\\033[0;31m"
+
+readonly BIN_SCRIPTS="$BIN_SCRIPTS"
+BIN_SCRIPTS_EX=""
+
+log_err() {
+  echo -e "${red}❌${cf} $1" 1>&2
+}
+
+is_err() {
+  if [[ $? -gt 0 ]]; then
+    return 0
+  else
+    return 1
+  fi
+}
+
+is_exists_command() {
+  which "$1" >/dev/null 2>&1
+  return $?
+}
+
+err_exit() {
+  log_err "$1"
+  if [[ -z "$2" ]]; then
+    exit 1
+  else
+    exit "$2"
+  fi
+}
+
+is_c_file() {
+  local extension
+  extension="${1##*.}"
+  if [[ "$extension" == "c" ]]; then
+    return 0
+  else
+    return 1
+  fi
+}
+
+if [[ -z "$BIN_SCRIPTS" ]]; then
+  err_exit "\$BIN_SCRIPTS is not found"
+else
+  BIN_SCRIPTS_EX="$BIN_SCRIPTS/bin/ex"
+  if [[ ! -d "$BIN_SCRIPTS_EX" ]]; then
+    mkdir -p "$BIN_SCRIPTS_EX"
+    if is_err; then
+      err_exit "can't create directory \$BIN_SCRIPTS_EX"
+    fi
+  fi
+fi
+
+install_tfref() {
+  curl -s https://raw.githubusercontent.com/kis9a/tfref/main/tfref >"$BIN_SCRIPTS_EX/tfref"
+  chmod +x "$BIN_SCRIPTS_EX/tfref"
+}
+
+install_runeboxes() {
+  curl -s https://raw.githubusercontent.com/kis9a/runeboxes/main/runeboxes >"$BIN_SCRIPTS_EX/runeboxes"
+  chmod +x "$BIN_SCRIPTS_EX/runeboxes"
+}
+
+install_runeflex() {
+  curl -s https://raw.githubusercontent.com/kis9a/runeflex/main/runeflex >"$BIN_SCRIPTS_EX/runeflex"
+  chmod +x "$BIN_SCRIPTS_EX/runeflex"
+}
+
+install_runeflexrn() {
+  curl -s https://raw.githubusercontent.com/kis9a/runeflex/main/runeflexrn >"$BIN_SCRIPTS_EX/runeflexrn"
+  chmod +x "$BIN_SCRIPTS_EX/runeflexrn"
+}
+
+install_c_files() {
+  local ls
+  if ! is_exists_command "c99"; then
+    return 1
+  else
+    ls=$(ls "$BIN_SCRIPTS/bin")
+    while read -r f; do
+      if is_c_file "$f"; then
+        c99 "$BIN_SCRIPTS/bin/$f" -o "$BIN_SCRIPTS_EX/${f%.c}"
+      fi
+    done <<<"$ls"
+  fi
+}
+
+if ! is_exists_command "tfref"; then
+  install_tfref
+fi
+
+if ! is_exists_command "runeboxes"; then
+  install_runeboxes
+fi
+
+if ! is_exists_command "runeflex"; then
+  install_runeflex
+fi
+
+if ! is_exists_command "runeflexrn"; then
+  install_runeflexrn
+fi
+
+if ! install_c_files; then
+  log_err "failed install c files"
+fi

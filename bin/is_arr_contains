@@ -1,0 +1,17 @@
+#!/bin/bash
+
+is_arr_contains() {
+  if [[ -z "$1" ]] || [[ -z "$2" ]]; then
+    return 1
+  fi
+  e="$1" && shift
+  local -a arr=("$@")
+  for i in "${arr[@]}"; do
+    if [[ "$e" == "$i" ]]; then
+      return 0
+    fi
+  done
+  return 1
+}
+
+is_arr_contains "$@"

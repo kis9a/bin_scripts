@@ -1,0 +1,8 @@
+#!/bin/bash
+
+fmt_tab_to_space() {
+  echo "${1:0}"
+  sed -i.bak $'s/\t/  /g' "$1"
+}
+
+fmt_tab_to_space "$1"

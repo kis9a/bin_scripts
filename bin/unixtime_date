@@ -1,0 +1,11 @@
+#!/bin/bash
+
+timestamp_to_date() {
+  if is_osx; then
+    date -r "$1"
+  else
+    date -d @"$1"
+  fi
+}
+
+timestamp_to_date "$1"

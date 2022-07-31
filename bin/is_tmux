@@ -1,0 +1,7 @@
+#!/bin/bash
+
+is_tmux() {
+  [[ -n "$TMUX" ]]
+}
+
+is_tmux "$@"

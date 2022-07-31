@@ -1,0 +1,30 @@
+#!/bin/bash
+
+is_file() {
+  local extension
+  extension="${1##*.}"
+  if [[ ! -x "$1" ]]; then
+    if [[ "$extension" == "$1" ]] || [[ "$extension" == "sh" ]] || [[ "$extension" == "bash" ]]; then
+      return 0
+    else
+      return 1
+    fi
+  else
+    return 1
+  fi
+}
+
+chx_dir() {
+  local file
+  local ls
+
+  ls="$(ls)"
+  while read -r file; do
+    if is_file "$file"; then
+      chmod +x "$file"
+      printf "%s\n" "$file"
+    fi
+  done <<<"$ls"
+}
+
+chx_dir "$@"

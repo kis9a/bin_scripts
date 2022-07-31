@@ -1,0 +1,99 @@
+#!/bin/bash
+
+help() {
+  cat <<EOF
+
+USAGE:
+  github_browser_open [options] [arguments]
+
+OPTIONS:
+  -h|--help: help
+
+EXAMPLES:
+$(examples)
+EOF
+}
+
+# ~/.vimrc
+# " github_browser_open
+# function! s:github_browser_open()
+#   let cursorline=line('.')
+#   let absolutePath=expand('%:p')
+#   let cmd = "!github_browser_open " . absolutePath . " " . cursorline
+#   silent execute cmd
+# endfunction
+#
+# nnoremap <silent> <Leader>go :call <SID>github_browser_open()<CR>
+
+# function! s:github_browser_open_x() abort
+#   let cwd=getcwd()
+#   let absolutePath=expand('%:p')
+#   let l1=line("'<")
+#   let l2=line("'>")
+#   let cmd = "!cd " . cwd . " && github_browser_open " . absolutePath . " " . l1 . " " . l2
+#   silent execute cmd
+# endfunction
+
+# xnoremap <silent> <Leader>go :<C-u> call <SID>github_browser_open_x()<CR>
+
+examples() {
+  cat <<'EOF'
+  github_browser_open $file_path $line_number? $line_number?
+EOF
+}
+
+get_open_cmd() {
+  if [[ -n "$OPEN_CMD" ]]; then
+    printf "%s" "$OPEN_CMD"
+  else
+    case "$(uname | tr "[:lower:]" "[:upper:]")" in
+      *'linux'*)
+        echo 'xdg-open'
+        ;;
+      *'bsd'*)
+        echo 'xdg-open'
+        ;;
+      *'darwin'*)
+        echo 'open'
+        ;;
+      *)
+        echo 'open'
+        ;;
+    esac
+  fi
+}
+
+case "$1" in
+  "-h" | "--help")
+    help
+    exit 0
+    ;;
+  *)
+    if [[ -z "$1" ]]; then
+      printf "File path is required" 1>&2
+      exit 1
+    fi
+
+    git_path="$(git ls-files --full-name "$1")"
+    if [[ $? -ne 0 ]]; then
+      printf "%s" "$git_path" 1>&2
+      exit 1
+    fi
+
+    head="$(git symbolic-ref --short -q HEAD)"
+    if [[ -z "$head" ]]; then
+      head="$(git rev-parse HEAD)"
+    fi
+
+    repo_url="$(git remote get-url origin)"
+    repo_url=${repo_url%.git}
+
+    if [[ -n "$2" && -z "$3" ]]; then
+      $(get_open_cmd) "$repo_url/blob/$head/${git_path}#L$2"
+    elif [[ -n "$3" ]]; then
+      $(get_open_cmd) "$repo_url/blob/$head/${git_path}#L$2,L$3"
+    else
+      $(get_open_cmd) "$repo_url/blob/$head/$git_path"
+    fi
+    ;;
+esac

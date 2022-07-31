@@ -1,0 +1,34 @@
+#!/bin/bash
+
+OS_TYPE="$(get_os_type)"
+
+bookmarks_brave() {
+  local links
+  case "$OS_TYPE" in
+    "osx")
+      local file="$HOME/Library/Application Support/BraveSoftware/Brave-Browser/Default/Bookmarks"
+      if [[ -e "$file" ]]; then
+        links="$(grep '\"url\":' <"$file" | awk '{ print $nf }' | tr -d \" | fzf -m)"
+      else
+        printf "%s not found" "$file" 1>&2
+      fi
+      ;;
+    *) ;;
+  esac
+  for l in $links; do
+    if is_url "$l"; then
+      open "$l"
+    fi
+  done
+}
+
+run() {
+  local action="$1"
+  shift
+  case "$action" in
+    "b") bookmarks_brave "$@" ;;
+    *) bookmarks_brave ;;
+  esac
+}
+
+run "$1"

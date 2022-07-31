@@ -1,0 +1,20 @@
+#!/bin/bash
+
+align_left() {
+  local s=""
+  local columns
+  local line
+  columns="$(tput cols)"
+
+  if [[ -e "$1" ]]; then
+    s="$(cat "$1")"
+  else
+    s="$1"
+  fi
+
+  while IFS= read -r line; do
+    printf "%*s\n" $(((${#line} + columns) / 2)) "$line"
+  done <<<"$s"
+}
+
+align_left "$@"

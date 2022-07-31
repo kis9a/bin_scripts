@@ -1,0 +1,7 @@
+#!/bin/bash
+
+file_hash() {
+  openssl sha256 -r "$1" | awk '{ print $1 }'
+}
+
+file_hash "$1"

@@ -1,0 +1,81 @@
+#!/bin/bash
+
+## battery percentage
+
+str_lower() {
+  if [[ $# -eq 0 ]]; then
+    cat <&0
+  elif [[ $# -eq 1 ]]; then
+    if [[ -f "$1" ]] && [[ -r "$1" ]]; then
+      cat "$1"
+    else
+      printf "%s" "$1"
+    fi
+  else
+    return 1
+  fi | tr "[:upper:]" "[:lower:]"
+}
+
+is_osx() {
+  if [[ "$(str_lower "$(uname)")" == "darwin" ]]; then
+    return 0
+  else
+    return 1
+  fi
+}
+
+get_battery_percentage() {
+  if is_osx; then
+    ioreg -n AppleSmartBattery | awk '/MaxCapacity/ { MAX=$5 } /CurrentCapacity/ { CURRENT=$5 } END { printf("%5.2f%%", CURRENT/MAX*100) }'
+  fi
+}
+
+battery_info() {
+  if is_osx; then
+    ioreg -n AppleSmartBattery |
+      awk '/MaxCapacity/ { MAX=$5 }
+      /CurrentCapacity/ { CURRENT=$5 }
+      /InstantTimeToEmpty/ { REMAIN=$5  }
+      END { printf("current: %4d [mAh]\nmax: %4d [mAh] (%5.2f%%)\nremain: %3d [min]\n\n",
+                   CURRENT, MAX, CURRENT/MAX*100, REMAIN) }'
+  fi
+}
+
+bp() {
+  local row=12
+  local height=5
+  local p
+  p="$(get_battery_percentage | cut -d "." -f 1)"
+  battery_info
+  printf "%s %%\n" "$p"
+
+  if [[ "${p: -1}" -lt 6 ]]; then
+    l="$((${p:0:1} + 1))"
+  else
+    l="$((${p:0:1} + 2))"
+  fi
+
+  for ((i = 0; i < height; i++)); do
+    for ((j = 0; j < row; j++)); do
+      if [[ "$i" -eq 0 ]] || [[ "$i" -eq "$((height - 1))" ]]; then
+        printf "%s" "#"
+      else
+        if [[ "$j" -lt "$l" ]]; then
+          printf "%s" "#"
+        else
+          if [[ "$j" -ne "$((row - 1))" ]]; then
+            printf "%s" " "
+          fi
+        fi
+      fi
+    done
+
+    if [[ "$i" -ne 0 ]] && [[ "$i" -ne "$((height - 1))" ]]; then
+      printf "%s" "###"
+    fi
+
+    printf "\n"
+  done
+}
+
+bp "$@"

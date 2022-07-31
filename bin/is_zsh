@@ -1,0 +1,7 @@
+#!/bin/bash
+
+is_zsh() {
+  [[ -n "$ZSH_VERSION" ]]
+}
+
+is_zsh "$@"

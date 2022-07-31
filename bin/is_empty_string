@@ -1,0 +1,11 @@
+#!/bin/bash
+
+is_empty_string() {
+  if [[ "$1" =~ ^[[:blank:]]*$ ]]; then
+    return 0
+  else
+    return 1
+  fi
+}
+
+is_empty_string "$@"

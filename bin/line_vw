@@ -1,0 +1,25 @@
+#!/bin/bash
+
+line_vw() {
+  local columns
+  local full=1
+  local i
+
+  columns="$(tput cols)"
+
+  if [[ -z $(LC_ALL=C grep -o '[[:print:][:cntrl:]]' <<<"$1") ]]; then
+    full=0
+  fi
+
+  if [[ $full -eq 0 ]]; then
+    for ((i = 0; i < $((columns / 2)); i = i + 1)); do
+      echo -n "$1"
+    done
+  else
+    for ((i = 0; i < columns; i = i + 1)); do
+      echo -n "$1"
+    done
+  fi
+}
+
+line_vw "$@"

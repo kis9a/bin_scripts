@@ -1,0 +1,11 @@
+#!/bin/bash
+
+is_url() {
+  if grep -qE '(?:^|[\s　]+)((?:https?|ftp):\/\/[^\s　]+)' <<<"$1"; then
+    return 0
+  else
+    return 1
+  fi
+}
+
+is_url "$1"

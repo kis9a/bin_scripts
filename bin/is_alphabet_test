@@ -1,0 +1,54 @@
+#!/bin/bash
+
+readonly cf="\\033[0m"
+readonly red="\\033[0;31m"
+readonly green="\\033[0;32m"
+
+TRUE=0
+FALSE=1
+
+assert_equal() {
+  if [[ "$1" != "$2" ]]; then
+    return 1
+  else
+    return 0
+  fi
+}
+
+test_err() {
+  echo -e "${red}❌${cf} $1" 1>&2
+}
+
+test_succ() {
+  echo -e "${green}✓ ${cf} $1" 1>&2
+}
+
+test_is_alphabet() {
+  local case="$1"
+  local str="$3"
+  local expected="$2"
+  local actual
+
+  if is_alphabet "$str"; then
+    actual="$TRUE"
+  else
+    actual="$FALSE"
+  fi
+
+  if assert_equal "$actual" "$expected"; then
+    test_succ "test_is_alphabet $case"
+  else
+    test_err "test_is_alphabet $case"
+  fi
+}
+
+run_test() {
+  test_is_alphabet "case alphabet" "$TRUE" "abcdefg"
+  test_is_alphabet "case upperCase alphabet" "$TRUE" "AAAAAfg"
+  test_is_alphabet "case bool string" "$TRUE" "true"
+  test_is_alphabet "case alphabet with space" "$FALSE" "abc dfeg"
+  test_is_alphabet "case number" "$FALSE" "12"
+  test_is_alphabet "case emoji" "$FALSE" "🐳"
+}
+
+run_test "$@"

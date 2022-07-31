@@ -1,0 +1,15 @@
+#!/bin/bash
+
+decode_url() {
+  : "${1//+/ }"
+  printf '%b\n' "${_//%/\\x}"
+
+}
+
+mld() {
+  local d
+  d="$(decode_url "$1")"
+  printf "%s" '['"$(curl -sL "$1" | grep -o "<title>[^<]*" | tail -c+8)"']('"$d"')'
+}
+
+mld "$@"

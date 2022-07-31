@@ -1,0 +1,32 @@
+#!/bin/bash
+
+SIZE=8
+
+run_cowsayy() {
+  in_box "$1"
+  printf "\n"
+  repeat_char ' ' "$SIZE"
+  printf '\   ^__^\n'
+  repeat_char ' ' "$SIZE"
+  printf ' \  (oo)\_______\n'
+  repeat_char ' ' "$SIZE"
+  printf '    (__)\       )\/\\\n'
+  repeat_char ' ' "$SIZE"
+  printf '        ||----w |\n'
+  repeat_char ' ' "$SIZE"
+  printf '        ||     ||\n'
+}
+
+if is_pipe; then
+  if is_number "$2"; then
+    SIZE="$2"
+  fi
+  o="$(cat - | run_cowsayy "$@")"
+  printf "%s" "$o"
+else
+  if is_number "$3"; then
+    SIZE="$3"
+  fi
+  o="$(printf "%s" "$2" | run_cowsayy "$1" "$3")"
+  printf "%s" "$o"
+fi

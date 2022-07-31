@@ -1,0 +1,63 @@
+#!/bin/bash
+
+in_box() {
+  local lines
+  local input
+  local k
+  local max
+
+  input="$(cat -)"
+  lines=""
+  max=0
+
+  while read -r l; do
+    if [[ ${#l} -gt $max ]]; then
+      max=${#l}
+    fi
+    lines+=("$l")
+    ((i++))
+  done <<<"$input"
+
+  for ((k = 0; k < $((max + 4)); k = k + 1)); do
+    printf "%s" "$1"
+  done
+
+  printf "\n"
+  for l in "${lines[@]}"; do
+    printf "%s" "$1 $l"
+    for ((k = 0; k < $((max - ${#l} + 1)); k++)); do
+      printf "%s" " "
+    done
+    echo "$1"
+  done
+
+  for ((k = 0; k < $((max + 4)); k = k + 1)); do
+    if [[ $k -eq 0 ]] || [[ $k -eq $((max + 3)) ]]; then
+      printf "%s" "$1"
+    else
+      printf "%s" " "
+    fi
+  done
+
+  printf "\n"
+  for ((k = 0; k < $((max + 4)); k = k + 1)); do
+    printf "%s" "$1"
+  done
+}
+
+G="#"
+
+if [[ -n "$1" ]]; then
+  G="$1"
+elif [[ "${#1}" -gt 1 ]]; then
+  echo "length expected less than 1 int"
+elif [[ -z $(LC_ALL=C grep -o '[[:print:][:cntrl:]]' <<<"$G") ]]; then
+  echo "not supported full width char"
+fi
+
+if is_pipe; then
+  in_box "$G"
+else
+  shift
+  echo "$@" | in_box "$G"
+fi

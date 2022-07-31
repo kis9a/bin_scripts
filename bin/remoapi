@@ -1,0 +1,64 @@
+#!/bin/bash
+
+# https://swagger.nature.global/#/
+# サーバは 5分以内に30回 以内リクエスト
+remo_devices() {
+  curl -s -X GET "https://api.nature.global/1/devices" -k \
+    -H "accept: application/json" \
+    -H "Authorization: Bearer $REMO_API_ACCESS_TOKEN"
+}
+
+remo_users() {
+  curl -s -X GET "https://api.nature.global/1/users/me" -k \
+    -H "accept: application/json" \
+    -H "Authorization: Bearer $REMO_API_ACCESS_TOKEN"
+}
+
+remo_appliances() {
+  curl -s -X GET "https://api.nature.global/1/appliances" -k \
+    -H "accept: application/json" \
+    -H "Authorization: Bearer $REMO_API_ACCESS_TOKEN"
+}
+
+remo_appliances_signals() {
+  curl -X GET "https://api.nature.global/1/appliances/$1/signals" \
+    -H "accept: application/json" \
+    -H "Authorization: Bearer $REMO_API_ACCESS_TOKEN"
+}
+
+remo_appliances_signals() {
+  curl -X GET "https://api.nature.global/1/appliances/$1/signals" \
+    -H "accept: application/json" \
+    -H "Authorization: Bearer $REMO_API_ACCESS_TOKEN"
+}
+
+remo_appliances_signal_names() {
+  curl -s -X GET "https://api.nature.global/1/appliances" \
+    -H "accept: application/json" \
+    -H "Authorization: Bearer $REMO_API_ACCESS_TOKEN" | jq '.[] | .signals | .[] | .name'
+}
+
+remo_appliances_signal_id_by_name() {
+  signals="$(curl -s -X GET "https://api.nature.global/1/appliances" \
+    -H "accept: application/json" \
+    -H "Authorization: Bearer $REMO_API_ACCESS_TOKEN" | jq '.[] | .signals')"
+  id="$(printf "%s" "$signals" | jq -r --arg name "$1" '.[] | select(.name == $name) | .id')"
+  printf "%s" "$id"
+}
+
+remo_appliances_signals_send() {
+  signals="$(curl -s -X GET "https://api.nature.global/1/appliances" \
+    -H "accept: application/json" \
+    -H "Authorization: Bearer $REMO_API_ACCESS_TOKEN" | jq '.[] | .signals')"
+  name="$(printf "%s" "$signals" | jq -r '.[] | .name' | fzf)"
+  id="$(printf "%s" "$signals" | jq -r --arg name "$name" '.[] | select(.name == $name) | .id')"
+  curl -s -X POST "https://api.nature.global/1/signals/$id/send" \
+    -H "accept: application/json" \
+    -H "Authorization: Bearer $REMO_API_ACCESS_TOKEN" >/dev/null
+}
+
+remo_appliances_signals_send_id() {
+  curl -s -X POST "https://api.nature.global/1/signals/$id/send" \
+    -H "accept: application/json" \
+    -H "Authorization: Bearer $REMO_API_ACCESS_TOKEN" >/dev/null
+}

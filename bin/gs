@@ -1,0 +1,113 @@
+#!/bin/bash
+
+readonly cf="\\033[0m"
+readonly red="\\033[0;31m"
+
+S=1
+POSITIONAL_ARGS=()
+
+log_err() {
+  echo -e "${red}❌${cf} $1" 1>&2
+}
+
+err_exit() {
+  log_err "$1"
+  if [[ -z "$2" ]]; then
+    exit 1
+  else
+    exit "$2"
+  fi
+}
+
+exit_health() {
+  exit 0
+}
+
+git_staged() {
+  git status --short | grep '^\w.' "$@"
+}
+
+git_unstaged() {
+  git status --short | grep '^\W.' "$@"
+}
+
+git_unstaged_tracked() {
+  git status --short | grep '^\s.' "$@"
+}
+
+git_untracked() {
+  git status --short | grep '^??' "$@"
+}
+
+git_status_s() {
+  git status -s "$@"
+}
+
+help() {
+  cat <<EOF
+USAGE:
+  gs [options] [arguments]
+
+OPTIONS:
+  -h|--help: hlep
+
+ACTIONS:
+  s: git_staged
+  us: git_unstaged
+  uut: git_unstaged_tracked
+  ut: git_untracked
+EOF
+}
+
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    -h | --help)
+      help
+      exit_health
+      ;;
+    -s | --short)
+      S=0
+      shift
+      ;;
+    -* | --*)
+      err_exit "Invalid option" 1
+      break
+      ;;
+    *)
+      POSITIONAL_ARGS+=("$1")
+      shift
+      ;;
+  esac
+done
+
+set -- "${POSITIONAL_ARGS[@]}"
+
+run() {
+  local action="$1"
+  shift
+  case "$action" in
+    "s") git_staged "$@" ;;
+    "us") git_unstaged "$@" ;;
+    "uut") git_unstaged_tracked "$@" ;;
+    "ut") git_untracked "$@" ;;
+    "h" | "help")
+      help
+      exit_health
+      ;;
+    *) ;;
+  esac
+}
+
+if [[ -z "$1" ]]; then
+  if [[ "$S" -eq 0 ]]; then
+    git_status_s "$@" | awk '{ print $2 }'
+  else
+    git_status_s "$@"
+  fi
+else
+  if [[ "$S" -eq 0 ]]; then
+    run "$@" | awk '{ print $2 }'
+  else
+    run "$@"
+  fi
+fi

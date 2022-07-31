@@ -1,0 +1,47 @@
+#!/bin/bash
+
+api_github() {
+  curl -s "https://api.github.com/"
+}
+
+api_github_repos() {
+  if [[ "$#" -lt 1 ]]; then
+    echo "user name is required"
+  else
+    curl -s "https://api.github.com/users/$1/repos"
+  fi
+}
+
+api_github_repos_not_fork() {
+  if [[ "$#" -lt 1 ]]; then
+    echo "user name is required"
+  else
+    curl -s "https://api.github.com/users/$1/repos" | jq '.[] | select(.fork == false) | .'
+  fi
+}
+
+api_github_repos_clone_fzf() {
+  if [[ "$#" -lt 1 ]]; then
+    echo "user name is required"
+  else
+    curl -s "https://api.github.com/users/$1/repos" | grep \"clone_url\" | awk '{print $2}' | sed -e 's/"//g' -e 's/,//g' | fzf -m | xargs -I {} git clone {}
+  fi
+}
+
+api_github_gists_get() {
+  if [[ "$#" -lt 1 ]]; then
+    echo "user name is required"
+  else
+    curl -s "https://api.github.com/users/$1/gists" | grep \"raw_url\" | awk '{print $2}' | sed -e 's/"//g' -e 's/,//g' | xargs -n1 curl -O
+  fi
+}
+
+api_github_ssh_key() {
+  curl -s "https://github.com/$1.keys"
+  # >> .ssh/authorized_keys
+}
+
+api_github_gpg_key() {
+  curl -s "https://github.com/$1.gpg"
+  # | gpg --import
+}

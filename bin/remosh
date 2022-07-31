@@ -1,0 +1,71 @@
+#!/bin/bash
+
+help() {
+  cat <<EOF
+
+USAGE:
+  remosh [options] [action] [arguments]
+
+OPTIONS:
+  -h|--help: help
+
+ACTIONS:
+$(actions)
+
+EXAMPLES:
+$(examples)
+EOF
+}
+
+actions() {
+  cat <<'EOF'
+  signal_send "$signal_name"
+  signal_names
+EOF
+}
+
+examples() {
+  cat <<'EOF'
+  remosh signal_send "light-on"
+  remosh signal_names
+EOF
+}
+
+remo_appliances_signal_id_by_name() {
+  signals="$(curl -s -X GET "https://api.nature.global/1/appliances" \
+    -H "accept: application/json" \
+    -H "Authorization: Bearer $REMO_API_ACCESS_TOKEN" | jq '.[] | .signals')"
+  id="$(printf "%s" "$signals" | jq -r --arg name "$1" '.[] | select(.name == $name) | .id')"
+  printf "%s" "$id"
+}
+
+remo_appliances_signals_send_by_id() {
+  curl -s -X POST "https://api.nature.global/1/signals/$1/send" \
+    -H "accept: application/json" \
+    -H "Authorization: Bearer $REMO_API_ACCESS_TOKEN" >/dev/null
+}
+
+remo_appliances_signal_names() {
+  curl -s -X GET "https://api.nature.global/1/appliances" \
+    -H "accept: application/json" \
+    -H "Authorization: Bearer $REMO_API_ACCESS_TOKEN" | jq '.[] | .signals | .[] | .name'
+}
+
+case "$1" in
+  "signal_send")
+    signal_name="$(remo_appliances_signal_id_by_name "$2")"
+    remo_appliances_signals_send_by_id "$signal_name"
+    ;;
+  "signal_names")
+    remo_appliances_signal_names
+    ;;
+  "-h" | "--help")
+    help
+    exit 0
+    ;;
+  *)
+    printf "Action not found %s\n" "$1" 1>&2
+    help
+    exit 0
+    ;;
+esac

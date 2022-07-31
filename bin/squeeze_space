@@ -1,0 +1,7 @@
+#!/bin/bash
+
+squeeze_space() {
+  tr -s '[:blank:]' <<<"$1"
+}
+
+squeeze_space "$1"

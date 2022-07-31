@@ -1,0 +1,11 @@
+#!/bin/bash
+
+is_osx() {
+  if [[ "$(str_lower "$(uname)")" =~ .*darwin.* ]]; then
+    return 0
+  else
+    return 1
+  fi
+}
+
+is_osx

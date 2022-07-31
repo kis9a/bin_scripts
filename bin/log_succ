@@ -1,0 +1,8 @@
+#!/bin/bash
+
+readonly cf="\\033[0m"
+readonly green="\\033[0;32m"
+
+log_err() {
+  echo -e "${green}❌${cf} $1" 1>&2
+}

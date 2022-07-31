@@ -1,0 +1,7 @@
+#!/bin/bash
+
+if is_piep; then
+  jq -r tostring
+else
+  jq -r tostring <"$1"
+fi

@@ -1,0 +1,11 @@
+#!/bin/bash
+
+is_linux() {
+  if [[ "$(str_lower "$(uname)")" == .*linux.* ]]; then
+    return 0
+  else
+    return 1
+  fi
+}
+
+is_linux

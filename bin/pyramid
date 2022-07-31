@@ -1,0 +1,43 @@
+#!/bin/bash
+
+pyramid() {
+  local line
+  local columns
+  local line="$2"
+  local full=1
+  local str
+  local i
+
+  str="$1"
+  columns="$(tput cols)"
+
+  if [[ -z "$line" ]]; then
+    line=20
+  fi
+
+  if [[ -z $(LC_ALL=C grep -o '[[:print:][:cntrl:]]' <<<"$1") ]]; then
+    full=1
+    columns="$((columns / 2))"
+  fi
+
+  for ((i = 0; i < line; i = i + 1)); do
+    if [[ $full -eq 1 ]]; then
+      printf "%*s\n" $(((${#str} + columns) / 2)) "$str"
+    else
+      printf "%*s\n" $(((${#str} + columns) / 2 - i)) "$str"
+    fi
+    str=$str"$1$1"
+  done
+}
+
+G="#"
+
+if [[ -n "$1" ]]; then
+  G="$1"
+elif [[ "${#1}" -gt 1 ]]; then
+  echo "length expected less than 1 int"
+elif [[ -z $(LC_ALL=C grep -o '[[:print:][:cntrl:]]' <<<"$G") ]]; then
+  echo "not supported full width char"
+fi
+
+pyramid "$G" "$2"

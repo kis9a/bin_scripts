@@ -1,0 +1,43 @@
+#!/bin/bash
+
+readonly cf="\\033[0m"
+readonly red="\\033[0;31m"
+readonly green="\\033[0;32m"
+
+assert_equal() {
+  if [ "$1" != "$2" ]; then
+    echo "expected: $1"
+    echo "actual:   $2"
+    return 1
+  fi
+}
+
+assert_range() {
+  if [[ $1 -lt $2 ]]; then
+    echo "expected: $1"
+    echo "greater than: $2"
+    return 1
+  fi
+  if [[ $1 -gt $3 ]]; then
+    echo "expected: $1"
+    echo "less than: $3"
+    return 1
+  fi
+}
+
+is_diff() {
+  if [[ -z "$(diff <(printf "%s" "$1") <(printf "%s" "$2"))" ]]; then
+    return 1
+  else
+    return 0
+  fi
+}
+
+test_err() {
+  echo -e "${red}❌${cf} $1" 1>&2
+  exit 1
+}
+
+test_suc() {
+  echo -e "${green}✓ ${cf} $1" 1>&2
+}

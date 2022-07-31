@@ -1,0 +1,9 @@
+#!/bin/bash
+
+str_length() {
+  local length
+  length="$(printf "%s\n" "$1" | wc -c | sed -e 's/ *//')"
+  printf "%s" $((length - 1))
+}
+
+str_length "$@"

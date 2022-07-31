@@ -1,0 +1,11 @@
+#!/bin/bash
+
+is_hex_color() {
+  if [[ $1 =~ ^(#?([a-fA-F0-9]{6}|[a-fA-F0-9]{3}))$ ]]; then
+    return 0
+  else
+    return 1
+  fi
+}
+
+is_hex_color "$1"

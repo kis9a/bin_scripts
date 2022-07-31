@@ -1,0 +1,55 @@
+#!/bin/bash
+
+readonly cf="\\033[0m"
+readonly red="\\033[0;31m"
+readonly green="\\033[0;32m"
+
+TRUE=0
+FALSE=1
+
+assert_equal() {
+  if [[ "$1" != "$2" ]]; then
+    return 1
+  else
+    return 0
+  fi
+}
+
+test_err() {
+  echo -e "${red}❌${cf} $1" 1>&2
+}
+
+test_succ() {
+  echo -e "${green}✓ ${cf} $1" 1>&2
+}
+
+test_is_str_contains() {
+  local case="$1"
+  local str="$4"
+  local src="$3"
+  local expected="$2"
+  local actual
+
+  if is_str_contains "$src" "$str"; then
+    actual="$TRUE"
+  else
+    actual="$FALSE"
+  fi
+
+  if assert_equal "$actual" "$expected"; then
+    test_succ "test_is_str_contains $case"
+  else
+    test_err "test_is_str_contains $case"
+  fi
+}
+
+run_test() {
+  test_is_str_contains "case string contains" "$TRUE" "adfstrsdf" "str"
+  test_is_str_contains "case string contains suffix" "$TRUE" "adf str" "str"
+  test_is_str_contains "case string contains prefix" "$TRUE" "str adf" "str"
+  test_is_str_contains "case string not contains" "$FALSE" "aaa" "b"
+  test_is_str_contains "case string empty" "$FALSE" "" ""
+  test_is_str_contains "case string contains space" "$TRUE" "     " " "
+}
+
+run_test "$@"

@@ -1,0 +1,5 @@
+#!/bin/bash
+
+while read -r v; do
+  printf "output \"%s\" {\n value = var.%s \n}\n\n" "$v" "$v"
+done <<<"$(printf "%s" "$(cat -)" | grep ^variable | cut -f 2 -d ' ' | tr -d \"\')"

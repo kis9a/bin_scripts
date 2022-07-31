@@ -1,0 +1,9 @@
+#!/bin/bash
+
+while read -r v; do
+  if [[ "$v" =~ ^variable.* ]]; then
+    printf "%s:" "$v" | sed -e "s/^variable//g" | tr -d \" | tr -d \{ | tr -d '\ '
+  elif [[ "$v" =~ .*default.* ]]; then
+    printf "%s\n" "$v" | sed -e "s/default.*=//g"
+  fi
+done <<<"$(printf "%s" "$(cat -)" | grep -e ^variable -e default)"

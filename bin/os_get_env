@@ -1,0 +1,33 @@
+#!/bin/bash
+
+os_env() {
+  local e
+  local key
+  local value
+  local envs
+
+  if [[ ! $1 == "" ]]; then
+    envs=$(printenv | grep "$1")
+    if [[ $(printf "%s" "$envs" | wc -l) -eq 0 ]]; then
+      printf "\$%s is empty" "$1" >/dev/tty
+      return
+    else
+      while read -r e; do
+        key="$(printf "%s" "$e" | cut -d "=" -f 1)"
+        value="$(printf "%s" "$e" | cut -d "=" -f 2)"
+        if [[ "$key" == "$1" ]]; then
+          if [[ "$value" == "" ]]; then
+            printf "\$%s is empty" "$1" >/dev/tty
+            return
+          fi
+          printf "%s" "$value"
+          return
+        fi
+      done <<<"$envs"
+    fi
+  else
+    printf "env name is empty" 1>&2
+  fi
+}
+
+printf "%s" "$(os_env "$1")"

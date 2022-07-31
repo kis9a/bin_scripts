@@ -1,0 +1,58 @@
+#!/bin/bash
+
+# Referenced: https://stackoverflow.com/questions/21849328/enum-data-type-seems-not-available-in-bash
+
+set -u
+DEBUG=1
+
+# This funcion allow to declare enum "types", I guess
+enum() {
+  # skip index ???
+  shift
+  AA=${@##*\{} # get string strip after {
+  AA=${AA%\}*} # get string strip before }
+  AA=${AA//,/} # delete commaa
+  ((DEBUG)) && echo "$AA"
+  local I=0
+  for A in $AA; do
+    eval "$A=$I"
+    ((I++))
+  done
+}
+
+### Main program
+# Just declare enum as you need
+enum index { OK_INDEX, CANCEL_INDEX, ERROR_INDEX, CONFIRM_INDEX, SAVE_INDEX, EXIT_INDEX }
+
+# Print value of enumerated items
+echo "$OK_INDEX"
+echo "$CANCEL_INDEX"
+echo "$ERROR_INDEX"
+echo "$CONFIRM_INDEX"
+echo "$SAVE_INDEX"
+echo "$EXIT_INDEX"
+
+# Use enumerated index in program
+I=CONFIRM_INDEX
+case "$I" in
+  OK_INDEX)
+    echo "Process here when index is $I"
+    ;;
+  CANCEL_INDEX)
+    echo "Process here when index is $I"
+    ;;
+  ERROR_INDEX)
+    echo "Process here when index is $I"
+    ;;
+  CONFIRM_INDEX)
+    echo "Process here when index is $I"
+    ;;
+  SAVE_INDEX)
+    echo "Process here when index is $I"
+    ;;
+  EXIT_INDEX)
+    echo "Process here when index is $I"
+    ;;
+esac
+
+exit 0
