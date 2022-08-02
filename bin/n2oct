@@ -1,0 +1,15 @@
+#!/bin/bash
+
+printf '%o' "$(($1#$2))"
+
+dec2oct() {
+  printf '%o' $((10#$1))
+}
+
+bin2oct() {
+  printf '%o' $((2#$1))
+}
+
+hex2oct() {
+  printf '%o' $((16#$1))
+}
