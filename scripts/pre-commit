@@ -17,8 +17,9 @@ info() {
 }
 
 GIT_DIFF="$(git diff --cached --name-only --diff-filter=ACM)"
+IS_DOCKER_EXISTS=true
 
-is_cmd_exists() {
+is_exists_command() {
   which "$1" >/dev/null 2>&1
   return $?
 }
@@ -39,6 +40,16 @@ is_err() {
   fi
 }
 
+is_go_file() {
+  local extension
+  extension="${1##*.}"
+  if [[ "$extension" == "go" ]]; then
+    return 0
+  else
+    return 1
+  fi
+}
+
 is_sh_file() {
   local extension
   extension="${1##*.}"
@@ -46,6 +57,36 @@ is_sh_file() {
     return 0
   else
     return 1
+  fi
+}
+
+run_gofmt() {
+  info "start gofmt"
+  local go_files=()
+  local msg
+  local f
+  while read -r f; do
+    extension="${f##*.}"
+    if is_go_file "$f"; then
+      go_files+=("$f")
+      if $IS_DOCKER_EXISTS; then
+        msg="$(make go_fmt FILE="${f}")"
+      else
+        msg="$(gofmt -w "${f}")"
+      fi
+      if is_err; then
+        err "$msg"
+      else
+        succ "gofmt $f"
+      fi
+      git add "$f"
+    fi
+  done \
+    <<<"$GIT_DIFF"
+  if [[ "${#go_files[*]}" -gt 0 ]]; then
+    info "finish gofmt"
+  else
+    info "not exists go files, finish gofmt"
   fi
 }
 
@@ -58,7 +99,11 @@ run_shfmt() {
   while read -r f; do
     if is_sh_file "$f"; then
       sh_files+=("$f")
-      msg="$(make run_shfmt FILE="${f}")"
+      if $IS_DOCKER_EXISTS; then
+        msg="$(make run_shfmt FILE="${f}")"
+      else
+        msg="$(shfmt "${f}")"
+      fi
       if is_err; then
         err "$msg"
       else
@@ -75,4 +120,26 @@ run_shfmt() {
   fi
 }
 
-run_shfmt
+if is_exists_command "docker"; then
+  if ! run_shfmt; then
+    log_err "failed shfmt"
+  fi
+
+  if ! run_gofmt; then
+    log_err "failed gofmt"
+  fi
+else
+  IS_DOCKER_EXISTS=false
+
+  if is_exists_command "gofmt"; then
+    run_gofmt
+  else
+    info "skip gofmt, because gofmt command is not exists"
+  fi
+
+  if is_exists_command "shfmt"; then
+    run_gofmt
+  else
+    info "skip gofmt, because gofmt command is not exists"
+  fi
+fi

@@ -1,0 +1,171 @@
+#!/bin/bash
+
+readonly cf="\\033[0m"
+readonly red="\\033[0;31m"
+
+readonly BIN_SCRIPTS="$BIN_SCRIPTS"
+BIN_SCRIPTS_BIN_OUTS=""
+IS_DOCKER_EXISTS=true
+GOOS=""
+GOARCH=""
+
+log_err() {
+  echo -e "${red}❌${cf} $1" 1>&2
+}
+
+is_err() {
+  if [[ $? -gt 0 ]]; then
+    return 0
+  else
+    return 1
+  fi
+}
+
+is_exists_command() {
+  which "$1" >/dev/null 2>&1
+  return $?
+}
+
+err_exit() {
+  log_err "$1"
+  if [[ -z "$2" ]]; then
+    exit 1
+  else
+    exit "$2"
+  fi
+}
+
+is_c_file() {
+  local extension
+  extension="${1##*.}"
+  if [[ "$extension" == "c" ]]; then
+    return 0
+  else
+    return 1
+  fi
+}
+
+install_c99_scripts() {
+  local ls
+  ls=$(ls "$BIN_SCRIPTS/src/c99/scripts")
+  while read -r f; do
+    if is_c_file "$f"; then
+      c99 "$BIN_SCRIPTS/src/c99/scripts/$f" -o "$BIN_SCRIPTS_BIN_OUTS/${f%.c}"
+    fi
+  done <<<"$ls"
+}
+
+install_go_scripts() {
+  ls=$(ls "$BIN_SCRIPTS/src/go/scripts")
+  while read -r d; do
+    if $IS_DOCKER_EXISTS; then
+      make go_build OUT_PATH="bin/outs/$d" SRC_PATH="src/go/scripts/$d/main.go" GOOS="$GOOS" GOARCH="$GOARCH"
+    else
+      go build -o "bin/outs/$d" "src/go/scripts/$d/main.go"
+    fi
+  done <<<"$ls"
+}
+
+if [[ -z "$BIN_SCRIPTS" ]]; then
+  err_exit "\$BIN_SCRIPTS is not found"
+else
+  BIN_SCRIPTS_BIN_OUTS="$BIN_SCRIPTS/bin/outs"
+  if [[ ! -d "$BIN_SCRIPTS_BIN_OUTS" ]]; then
+    mkdir -p "$BIN_SCRIPTS_BIN_OUTS"
+    if is_err; then
+      err_exit "can't create directory \$BIN_SCRIPTS_BIN_OUTS"
+    fi
+  fi
+fi
+
+is_linux() {
+  if [[ "$(str_lower "$(uname)")" == .*linux.* ]]; then
+    return 0
+  else
+    return 1
+  fi
+}
+
+str_lower() {
+  if [[ $# -eq 0 ]]; then
+    cat <&0
+  elif [[ $# -eq 1 ]]; then
+    if [[ -f "$1" ]] && [[ -r "$1" ]]; then
+      cat "$1"
+    else
+      printf "%s" "$1"
+    fi
+  else
+    return 1
+  fi | tr "[:upper:]" "[:lower:]"
+}
+
+get_go_goose() {
+  if [[ -z "$GOOS" ]]; then
+    case $(str_lower "$(uname)") in
+      *linux*) GOOS="linux" ;;
+      *darwin*) GOOS="darwin" ;;
+    esac
+
+    if [[ -z "$GOOS" ]]; then
+      log_err "please, set ENV \$GOOS"
+    fi
+  fi
+  printf "%s" "$GOOS"
+}
+
+get_go_arch() {
+  if [[ -z "$GOARCH" ]]; then
+    case $(uname -m) in
+      i386) GOARCH="386" ;;
+      i686) GOARCH="386" ;;
+      x86_64) GOARCH="amd64" ;;
+      arm)
+        if is_exists_command "dpkg"; then
+          dpkg --print-GOARCH | grep -q "arm64" && GOARCH="arm64" || GOARCH="arm"
+        fi
+        ;;
+    esac
+
+    if [[ -z "$GOARCH" ]]; then
+      log_err "please, set ENV \$GOARCH"
+    fi
+  fi
+  printf "%s" "$GOARCH"
+}
+
+if ! is_exists_command "curl"; then
+  err_exit "curl command is not found" >&2
+fi
+
+if is_exists_command "c99"; then
+  if ! install_c99_scripts; then
+    log_err "failed install c99 scripts"
+  fi
+else
+  info "skip install c99 scripts, because c99 command is not exists"
+fi
+
+if is_exists_command "docker"; then
+  GOARCH="$(get_go_arch)"
+  if is_err; then
+    printf "failed get go arch"
+  else
+    GOOS=$(get_go_goose)
+    if is_err; then
+      printf "failed get go goos"
+    else
+      if ! install_go_scripts; then
+        log_err "failed install go scripts"
+      fi
+    fi
+  fi
+else
+  IS_DOCKER_EXISTS=false
+
+  if is_exists_command "go"; then
+    run_gofmt
+  else
+    info "skip go, because go command is not exists"
+  fi
+fi

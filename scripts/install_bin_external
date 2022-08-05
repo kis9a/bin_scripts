@@ -4,7 +4,7 @@ readonly cf="\\033[0m"
 readonly red="\\033[0;31m"
 
 readonly BIN_SCRIPTS="$BIN_SCRIPTS"
-BIN_SCRIPTS_BIN_EX=""
+BIN_SCRIPTS_BIN_EXTERNAL=""
 
 log_err() {
   echo -e "${red}❌${cf} $1" 1>&2
@@ -32,61 +32,41 @@ err_exit() {
   fi
 }
 
-is_c_file() {
-  local extension
-  extension="${1##*.}"
-  if [[ "$extension" == "c" ]]; then
-    return 0
-  else
-    return 1
-  fi
+install_tfref() {
+  curl -s https://raw.githubusercontent.com/kis9a/tfref/main/tfref >"$BIN_SCRIPTS_BIN_EXTERNAL/tfref"
+  chmod +x "$BIN_SCRIPTS_BIN_EXTERNAL/tfref"
+}
+
+install_runeboxes() {
+  curl -s https://raw.githubusercontent.com/kis9a/runeboxes/main/runeboxes >"$BIN_SCRIPTS_BIN_EXTERNAL/runeboxes"
+  chmod +x "$BIN_SCRIPTS_BIN_EXTERNAL/runeboxes"
+}
+
+install_runeflex() {
+  curl -s https://raw.githubusercontent.com/kis9a/runeflex/main/runeflex >"$BIN_SCRIPTS_BIN_EXTERNAL/runeflex"
+  chmod +x "$BIN_SCRIPTS_BIN_EXTERNAL/runeflex"
+}
+
+install_runeflexrn() {
+  curl -s https://raw.githubusercontent.com/kis9a/runeflex/main/runeflexrn >"$BIN_SCRIPTS_BIN_EXTERNAL/runeflexrn"
+  chmod +x "$BIN_SCRIPTS_BIN_EXTERNAL/runeflexrn"
 }
 
 if [[ -z "$BIN_SCRIPTS" ]]; then
   err_exit "\$BIN_SCRIPTS is not found"
 else
-  BIN_SCRIPTS_BIN_EX="$BIN_SCRIPTS/bin/ex"
-  if [[ ! -d "$BIN_SCRIPTS_BIN_EX" ]]; then
-    mkdir -p "$BIN_SCRIPTS_BIN_EX"
+  BIN_SCRIPTS_BIN_EXTERNAL="$BIN_SCRIPTS/bin/external"
+  if [[ ! -d "$BIN_SCRIPTS_BIN_EXTERNAL" ]]; then
+    mkdir -p "$BIN_SCRIPTS_BIN_EXTERNAL"
     if is_err; then
-      err_exit "can't create directory \$BIN_SCRIPTS_BIN_EX"
+      err_exit "can't create directory \$BIN_SCRIPTS_BIN_EXTERNAL"
     fi
   fi
 fi
 
-install_tfref() {
-  curl -s https://raw.githubusercontent.com/kis9a/tfref/main/tfref >"$BIN_SCRIPTS_BIN_EX/tfref"
-  chmod +x "$BIN_SCRIPTS_BIN_EX/tfref"
-}
-
-install_runeboxes() {
-  curl -s https://raw.githubusercontent.com/kis9a/runeboxes/main/runeboxes >"$BIN_SCRIPTS_BIN_EX/runeboxes"
-  chmod +x "$BIN_SCRIPTS_BIN_EX/runeboxes"
-}
-
-install_runeflex() {
-  curl -s https://raw.githubusercontent.com/kis9a/runeflex/main/runeflex >"$BIN_SCRIPTS_BIN_EX/runeflex"
-  chmod +x "$BIN_SCRIPTS_BIN_EX/runeflex"
-}
-
-install_runeflexrn() {
-  curl -s https://raw.githubusercontent.com/kis9a/runeflex/main/runeflexrn >"$BIN_SCRIPTS_BIN_EX/runeflexrn"
-  chmod +x "$BIN_SCRIPTS_BIN_EX/runeflexrn"
-}
-
-install_c99_scripts() {
-  local ls
-  if ! is_exists_command "c99"; then
-    return 1
-  else
-    ls=$(ls "$BIN_SCRIPTS/src/c99/scripts")
-    while read -r f; do
-      if is_c_file "$f"; then
-        c99 "$BIN_SCRIPTS/src/c99/scripts/$f" -o "$BIN_SCRIPTS_BIN_EX/${f%.c}"
-      fi
-    done <<<"$ls"
-  fi
-}
+if ! is_exists_command "curl"; then
+  err_exit "curl command is not found" >&2
+fi
 
 if ! is_exists_command "tfref"; then
   install_tfref
@@ -102,8 +82,4 @@ fi
 
 if ! is_exists_command "runeflexrn"; then
   install_runeflexrn
-fi
-
-if ! install_c99_scripts; then
-  log_err "failed install c99 scripts"
 fi
