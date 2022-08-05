@@ -1,0 +1,19 @@
+#!/bin/bash
+
+run_test() {
+  test_basename "a/bc/d" "d"
+  test_basename "a/bc/" "bc"
+  test_basename "//////////a/bc/" "bc"
+  test_basename "a/bc/d///////////////" "d"
+  test_basename "a/bc/d//あ" "あ"
+}
+
+test_basename() {
+  if assert_equal "$(basename.bash "$1")" "$2"; then
+    log_succ "test_basename: $1"
+  else
+    log_err "test_basename: $1"
+  fi
+}
+
+run_test "$@"

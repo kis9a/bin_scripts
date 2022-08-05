@@ -6,23 +6,23 @@ SHFMT_VERSION := v3-alpine
 BIN_SCRIPTS_ENV := ${BIN_SCRIPTS}
 SHFMT_IMAGE_NAME := $(SHFMT_REPO):$(SHFMT_VERSION)
 SHFMT_IMAGE := $(shell docker images $(SHFMT_IMAGE_NAME) -q)
-TEST_FILES := $(filter %_test, $(shell ls bin))
+TEST_FILES := $(filter %_test, $(shell ls tests))
 
 .DEFAULT_GOAL := help
 
 .PHONY: init
-init: ## init
-	install_bin_ex
-	pull_shfmt
-	pre_commit_hook
+init: # init
+	make install_bin_external
+	make pull_shfmt
+	make pre_commit_hook
 
-.PHONY: install_bin_ex
-install_bin_ex: ## install bin ex
-	@bash $(PWD)/bin/install/install_bin_ex
+.PHONY: install_bin_external
+install_bin_external: ## install bin external
+	@bash $(PWD)/scripts/install_bin_external
 
 .PHONY: pre_commit_hook
 pre_commit_hook:
-	@cp -f $(PWD)/ci/pre-commit $(PWD)/.git/hooks/pre-commit
+	@cp -f $(PWD)/scripts/pre-commit $(PWD)/.git/hooks/pre-commit
 
 .PHONY: pull_shfmt
 pull_shfmt: ## pull shfmt
@@ -34,7 +34,7 @@ run_shfmt: ## run shfmt
 
 .PHONY: run_test
 run_test: ## test
-	@$(foreach f, $(TEST_FILES), $(shell bash $(f)))
+	@$(foreach f, $(TEST_FILES), $(shell bash tests/$(f)))
 
 .PHONY: help
 help: ### display help

@@ -13,7 +13,7 @@ alias ....='cd ../../..'
 
 ## git
 alias g='git'
-alias g='git add'
+alias ga='git add'
 alias gd='git diff'
 alias gd@='git diff @'
 alias gdf='git_diff_fzf'

@@ -1,27 +1,7 @@
 #!/bin/bash
 
-readonly cf="\\033[0m"
-readonly red="\\033[0;31m"
-readonly green="\\033[0;32m"
-
 TRUE=0
 FALSE=1
-
-assert_equal() {
-  if [[ "$1" != "$2" ]]; then
-    return 1
-  else
-    return 0
-  fi
-}
-
-test_err() {
-  echo -e "${red}❌${cf} $1" 1>&2
-}
-
-test_succ() {
-  echo -e "${green}✓ ${cf} $1" 1>&2
-}
 
 test_is_empty_string() {
   local case="$1"
@@ -36,9 +16,9 @@ test_is_empty_string() {
   fi
 
   if assert_equal "$actual" "$expected"; then
-    test_succ "test_is_empty_string $case"
+    log_succ "test_is_empty_string $case"
   else
-    test_err "test_is_empty_string $case"
+    log_err "test_is_empty_string $case"
   fi
 }
 

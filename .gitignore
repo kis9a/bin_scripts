@@ -1,5 +1,7 @@
 # ignore
-bin/ex
+tmp
+bin/external
+bin/outs
 
 # Created by https://www.toptal.com/developers/gitignore/api/osx
 # Edit at https://www.toptal.com/developers/gitignore?templates=osx
