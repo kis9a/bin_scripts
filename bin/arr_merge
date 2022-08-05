@@ -1,0 +1,6 @@
+#!/bin/bash
+
+arr_merge() {
+  arr="$*"
+  printf "%s" "${arr[@]}"
+}

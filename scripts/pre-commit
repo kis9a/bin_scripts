@@ -1,0 +1,78 @@
+#!/bin/bash
+
+readonly CF="\\033[0m"
+readonly RED="\\033[0;31m"
+readonly GREEN="\\033[0;32m"
+
+err() {
+  echo -e "${RED}[ERROR]: $1${CF}" 1>&2
+}
+
+succ() {
+  echo -e "${GREEN}[SUCCESS]: $1${CF}"
+}
+
+info() {
+  echo -e "[INFO]: $1 "
+}
+
+GIT_DIFF="$(git diff --cached --name-only --diff-filter=ACM)"
+
+is_cmd_exists() {
+  which "$1" >/dev/null 2>&1
+  return $?
+}
+
+is_empty_string() {
+  if [[ $1 == "" ]]; then
+    return 0
+  else
+    return 1
+  fi
+}
+
+is_err() {
+  if [[ $? -gt 0 ]]; then
+    return 0
+  else
+    return 1
+  fi
+}
+
+is_sh_file() {
+  local extension
+  extension="${1##*.}"
+  if [[ -x "$1" ]] || [[ "$extension" == "sh" ]] || [[ "$extension" == "bash" ]]; then
+    return 0
+  else
+    return 1
+  fi
+}
+
+run_shfmt() {
+  info "start shfmt"
+  local sh_files=()
+  local msg
+  local f
+
+  while read -r f; do
+    if is_sh_file "$f"; then
+      sh_files+=("$f")
+      msg="$(make run_shfmt FILE="${f}")"
+      if is_err; then
+        err "$msg"
+      else
+        succ "shfmt $f"
+      fi
+      git add "$f"
+    fi
+  done \
+    <<<"$GIT_DIFF"
+  if [[ "${#sh_files[*]}" -gt 0 ]]; then
+    info "finish sh fmt"
+  else
+    info "not exists sh files, finish sh fmt"
+  fi
+}
+
+run_shfmt

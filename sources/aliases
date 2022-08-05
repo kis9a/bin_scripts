@@ -1,0 +1,74 @@
+#!/bin/bash
+
+## helper functions
+is_exists_command() {
+  which "$1" >/dev/null 2>&1
+  return $?
+}
+
+## cd
+alias ..='cd ..'
+alias ...='cd ../..'
+alias ....='cd ../../..'
+
+## git
+alias g='git'
+alias g='git add'
+alias gd='git diff'
+alias gd@='git diff @'
+alias gdf='git_diff_fzf'
+alias gremote='git remote get-url origin'
+alias gc='git commit'
+alias gr='git reset'
+alias gch='git checkout'
+alias gp='git push'
+alias gpf='git push -f'
+alias gu='git pull'
+alias gb='git branch'
+alias gcl='git clone'
+alias gclr='git clone --recurse-submodules'
+alias glo='git log --oneline'
+
+## tmux
+alias tm='tmux -u new -s $(basename `pwd`)'
+alias tma='tmux a'
+alias tmk='tmux kill-server'
+
+## docker
+alias dk='docker'
+alias dkp='docker ps'
+alias dkb='docker build'
+alias dkr='docker run --rm'
+alias dkrd='docker run -d'
+alias dkk='docker kill'
+alias dkrm='docker rm'
+alias dkri='docker rmi'
+alias dke='docker exec -ti'
+alias dkl='docker logs -f'
+alias dki='docker images'
+alias dkpu='docker pull'
+alias dkc='docker compose'
+alias dkcu='docker compose up'
+alias dkcr='docker compose run'
+
+## vim
+if [[ -n "$EDITOR" ]]; then
+  alias e='$EDITOR'
+  alias v='$EDITOR'
+elif is_exists_command "nvim"; then
+  alias v='nvim'
+elif is_exists_command "vim"; then
+  alias v='vim'
+elif is_exists_command "vi"; then
+  alias v='vi'
+fi
+
+## others
+alias sl='ls -afG --color=always | tail -n +3'
+alias mem="top -l 1 | grep Mem"
+alias psa='ps aux'
+
+if is_exists_command "trans"; then
+  alias te='trans {en=ja}'
+  alias tj='trans {ja=en}'
+fi

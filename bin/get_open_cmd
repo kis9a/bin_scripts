@@ -1,0 +1,24 @@
+#!/bin/bash
+
+get_open_cmd() {
+  if [[ -n "$OPEN_CMD" ]]; then
+    printf "%s" "$OPEN_CMD"
+  else
+    case "$(uname | tr "[:lower:]" "[:upper:]")" in
+      *'linux'*)
+        printf 'xdg-open'
+        ;;
+      *'bsd'*)
+        printf 'xdg-open'
+        ;;
+      *'darwin'*)
+        printf 'open'
+        ;;
+      *)
+        printf 'open'
+        ;;
+    esac
+  fi
+}
+
+get_open_cmd
